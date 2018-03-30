@@ -1,0 +1,162 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Stud
+{
+    //char Name[80];
+    //char faculty[80];
+    char *Name;
+    char *faculty;
+    int group_id;
+    int num_of_subjects;
+    struct Marks* subjects [25];
+}STUD;
+
+typedef struct Marks
+{
+    char* subject_name;
+    //char subject_name[80];
+    int mark;
+}MARKS;
+
+
+void PrintOnScreen(struct Stud** Arr, struct Marks** Brr, int N, int* num)
+{
+    printf("PrintOnScreen func \n");
+    int i;
+    int* u = num;
+    for (i = 0; i < N; i++)
+    {
+        printf("Student #%d name> %s\n", i, (*(Arr + i))->Name);
+        printf("Student #%d faculty> %s\n", i, (*(Arr + i))->faculty);
+        printf("Student #%d group_id> %d\n", i, (*(Arr + i))->group_id);
+        for (u = 0; u < num + N; u++)
+        {
+            printf("Student #%d subject_name> %s\n", *u, (*(Brr + *u))->subject_name);
+            printf("Student #%d mark> %d\n", *u, (*(Brr + *u))->mark);
+
+        }
+    }
+}
+
+void WriteToFile(struct Stud** Arr, struct Marks** Brr, int N, int* num)
+{
+    printf("WriteToFile func \n");
+
+    FILE *fp;
+    fp = fopen("output.txt", "w");
+    fprintf(fp, "%d\n", N);
+
+    int i;
+    int u;
+    for (i = 0; i < N; i++)
+    {
+        fprintf(fp, "%s %s %d\n", (*(Arr + i))->Name, (*(Arr + i))->faculty, (*(Arr + i))->group_id);
+        for (u = 0; u < *num; u++)
+        {
+            fprintf(fp, "%s %d\n", (*(Brr + u))->subject_name, (*(Brr + u))->mark);
+        }
+    }
+    fclose(fp);
+}
+
+int ReadFromFile(struct Stud** Arr, struct Marks** Brr)
+{
+    //--------File routine
+    FILE* fp;
+    fp = fopen("input.txt", "r");
+    if (fp == NULL)
+    {
+        printf("ERROR: Problems with input.txt");
+        return 0;
+    }
+
+    //----Stuff
+    int N = 0; //всего структур
+    int num_of_subjects;
+    char line[256];
+    // N of structs
+    fgets(line, sizeof(line), fp);
+    *(strchr(line, '\n')) = '\0';
+    N = atoi(line);
+    printf("Found %d students \n", N);
+    //----
+    int i = 0;
+    int j = 0;
+    while (fgets(line, sizeof(line), fp)) {
+        //
+        printf("Student # %d > %s", i, line);
+        *(strchr(line, '\n')) = '\0';
+        *(Arr + i) = (struct  Stud*)malloc(sizeof(struct Stud));
+        *(Brr + j) = (struct Marks*)malloc(sizeof(struct Marks));
+
+        //get name
+        char *space = strchr(line, ' ');
+        (*(Arr + i))->Name = (char*)malloc(sizeof(char) * (space - line + 1));
+        strncpy((*(Arr + i))->Name, line, space - line);
+        *((*(Arr + i))->Name + (space - line)) = '\0';
+
+
+        //get faculty
+        (*(Arr + i))->faculty = (char*)malloc(sizeof(char) * (space - line + 1));
+        strncpy((*(Arr + i))->faculty, line, space - line);
+        *((*(Arr + i))->faculty + (space - line)) = '\0';
+
+
+        //get group_id
+        (*(Arr + i))->group_id = atoi(space);
+
+
+        //get number_of_subjects
+        (*(Arr + i))->num_of_subjects = atoi(space);
+        for (j=Brr; j<Brr+num_of_subjects; j++)
+        {
+
+            //get subject_name
+            (*(Brr + i))->subject_name = (char*)malloc(sizeof(char) * (space - line + 1));
+            strncpy((*(Brr + i))->subject_name, line, space - line);
+            *((*(Brr + i))->subject_name + (space - line)) = '\0';
+
+
+            //get mark
+            (*(Brr + j))->mark = atoi(space);
+
+        }
+
+        //--
+        i++;
+    }
+
+    fclose(fp);
+
+    return N;
+}
+
+int main(void)
+{
+    int menu;
+    struct Stud* Arr[25];
+    int N = 0;
+    struct Marks* Brr[25];
+    int num_of_subjects[10];
+    int* num = num_of_subjects;
+    printf("press 1 to read data from file input.txt\n");
+    printf("---------------------\n");
+    printf("press 2 to print data on screen\n");
+    printf("---------------------\n");
+    printf("press 3 to print data into file out.txt\n");
+    printf("---------------------\n");
+    printf("press 0 to exit\n");
+    printf("---------------------\n");
+    scanf ("%d, &menu");
+    switch(menu)
+    {
+        case 1: N = ReadFromFile(Arr, Brr); //break;
+        case 2: PrintOnScreen(Arr, Brr, N, num); //break;
+        case 3: WriteToFile(Arr, Brr, N, num); //break;
+        case 0: return 0;
+        default: return 0;
+    }
+    //return 0;
+}
