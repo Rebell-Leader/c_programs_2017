@@ -1,1 +1,1 @@
-# Informatics_progi
+# Informatics_progs_1st_semester
